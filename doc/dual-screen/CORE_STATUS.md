@@ -1,7 +1,11 @@
 # Experiment 3: current core status, body health, and stamina
 
-Status: implemented with local host/fixture checks. Full Android compilation and
-Thor acceptance are still pending. No new APK or hardware acceptance is implied.
+Status: build 7 passed Android CI/package checks. Owner-reported Thor results pass
+layout, current values including damage penalties, health/stamina/focus handling,
+and session clearing. Movement-mode refresh is PARTIAL: the lower label updates
+after the next turn rather than immediately with the upper sidebar. See
+[Checkpoint 5](CHECKPOINT_5.md) and open finding `CORE-REFRESH-01`. This is a qualified
+checkpoint for continued development, not an all-pass acceptance.
 
 This builds on the accepted build 6 health/stamina display. It adds the requested
 Strength, Dexterity, Intelligence, Perception, Speed, Movement mode, and Focus.
@@ -10,7 +14,9 @@ remapping, signing changes, extra permissions, or second APK are introduced.
 
 ## Build
 
-After merging this change into `ds-dev`, start a NEW **CDDA-DS Android test** run:
+PR #2 has merged and build 7 already exists; no rebuild is needed merely to record
+its test results. For a subsequent requested build, start a NEW **CDDA-DS Android
+test** run:
 
 | Input | Value |
 |---|---|
@@ -21,8 +27,10 @@ After merging this change into `ds-dev`, start a NEW **CDDA-DS Android test** ru
 
 The workflow is still manual-only and gated to `ds-dev`; `baseline` remains the
 safe default. `stamina_probe` and `body_status` remain available unchanged. The
-accepted source is preserved as `checkpoint/body-status-6` at
-`643eabbf2f406cc69a99798cef3a073d9b1f3301`.
+accepted body-status source is preserved as `checkpoint/body-status-6` at
+`643eabbf2f406cc69a99798cef3a073d9b1f3301`. The tested core-status source is
+`checkpoint/core-status-7` at `8382d31744c2c138afd5130f3f7862e9322f01d9`, with the
+movement-refresh exception documented in Checkpoint 5.
 
 Use the owner's fresh-install development process after backing up wanted test
 data. Remove only CDDA-DS (test), not official CDDA. Keep the persistent signing
@@ -66,12 +74,13 @@ for inactive/unready states. No snapshot or label persists into the next session
 
 The accepted health/stamina section remains. Three paired rows add the attributes,
 speed and focus; one wrapping row shows movement. A non-focusable scroll container
-is a safety net for large fonts, long mode names or smaller displays. Normal Thor
-fit still requires testing. Scrolling only views the read-only panel; it does not
-send input to CDDA. Existing non-focusable Presentation, 250 ms polling, lifecycle
-hooks, and intact-upper-sidebar fallback are retained.
+is a safety net for large fonts, long mode names or smaller displays. The owner
+reported no scrolling or clipping at default Thor text size and DPI in build 7;
+other configurations remain unverified. Scrolling only views the read-only panel;
+it does not send input to CDDA. Existing non-focusable Presentation, 250 ms polling,
+lifecycle hooks, and intact-upper-sidebar fallback are retained.
 
-## Local validation and limits
+## Host/CI validation and limits
 
 The new host/fixture suite checks seven-file overlay planning, fail-before-write
 hash/path guards, current getters, unchanged lifecycle hooks, copied-state isolation,
@@ -81,24 +90,40 @@ calls it from Java under `-Xcheck:jni`. Tests cover field order, changed/zero/ne
 values, focus above 100, UTF-8 including supplementary characters, long/empty movement
 labels, malformed payloads, reader-copy independence, and session transitions.
 
-The host JVM is NOT an Android device. The Android Presentation itself is not built
-or exercised by that host JNI test. Full Android Java/native build and physical
-layout/focus/lifecycle testing remain required. The local overlay uses a small source
-fixture with matching integration anchors, not a full engine build; CI retains the
-original pinned-source hashes and must apply the real overlay before compilation.
+The host JVM is NOT an Android device. Those tests do not exercise the Android
+Presentation or actual game event/redraw timing. The local overlay uses a small
+source fixture with matching integration anchors, not a full engine build. Build 7
+subsequently passed all 51 host/fixture tests in CI, applied the seven-target overlay
+to the real pinned source, and completed Android Java/native compilation and the
+signing/package checks. The owner supplied the device observations below; CI success
+did not establish refresh behavior after a no-turn mode selection.
 
-## Device acceptance (pending)
+## Device acceptance (build 7: qualified, movement refresh PARTIAL)
 
-1. All seven new readouts fit and remain legible with health/stamina; no clipped
-   labels or values. Report whether scrolling is necessary at normal Thor settings.
-2. Compare all four current attributes, Speed and Focus with the upper sidebar.
-   Include a character/state with penalties or bonuses, not only starting values.
-3. Change movement using the ordinary game controls. Verify full name and letter
-   match each mode that can be selected; a rejected switch must not invent a change.
-4. Confirm values change on redraw without advancing turns merely to refresh the HUD.
-   Confirm stamina depletion/recovery and damage/healing still work.
-5. Repeat lower-touch/controller-focus, sleep/resume, app switching, menu clearing
-   and reload checks. No previous character's mode or core readings should survive.
+| Category | Owner-reported result |
+|---|---|
+| Layout | PASS: readable with no clipped labels/values and no scrolling at default Thor text size/DPI. |
+| Current values | PASS: all shown attributes/meters match the upper sidebar, including penalties from incoming damage. |
+| Movement mode | PARTIAL: the upper sidebar changes immediately after selection; the lower label changes only after the next turn. |
+| Health, stamina and focus handling | PASS: combined checklist category reported passed. |
+| Session clearing | PASS: menu/reload clearing category reported passed. |
+
+`CORE-REFRESH-01` remains open. The owner explicitly deferred an immediate fix and
+plans to test other readouts' no-turn refresh behavior after the next build. That
+cross-metric timing test is pending; do not claim all metrics share the delay.
+The capture/publication path is a working hypothesis, not a confirmed root cause.
+See Checkpoint 5 for reproduction and the snapshot-number/age diagnostic.
+
+## Future regression and closure checks
+
+1. Preserve default Thor fit and correct current values, including penalties/bonuses.
+2. Change movement through ordinary controls without advancing a turn; the lower
+   name/letter must eventually follow accepted selections in its normal refresh
+   cycle, while rejected switches must not invent a change. Currently PARTIAL.
+3. Check other legitimately no-turn state changes against both displays; record
+   snapshot number/age to help distinguish capture from rendering. Currently pending.
+4. Repeat health/stamina changes, lower-touch/controller focus, sleep/resume, app
+   switching, menu clearing and reload checks after future implementation changes.
 
 ## Deferred deliberately
 
@@ -107,5 +132,8 @@ which parts warrant health bars are required completeness/layout checks before
 final layout and coordinated show/hide/sidebar removal, not part of this increment.
 Upstream color rules, complete translation of fixed HUD labels, other metrics,
 both maps, compass, message log, interactive actions, and visibility controls are
-not implemented here. Sampling remains tied to sidebar redraws. Menus/idle turns
-can retain the last snapshot; its age is still displayed. This is not full Milestone 1.
+not implemented here. Sampling remains tied to the current sidebar hook. The known
+no-turn movement refresh gap must be addressed before the lower HUD replaces the
+upper sidebar; keeping the last snapshot in an idle menu is not blanket acceptance
+of stale values when the original sidebar already shows a change. This is not full
+Milestone 1.
