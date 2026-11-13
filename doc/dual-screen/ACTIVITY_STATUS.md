@@ -1,8 +1,9 @@
 # Experiment 4: activity, weariness and pain
 
-Status: implementation and 18 new local host/fixture tests completed. Full Android
-compilation, real-engine overlay application and Thor acceptance remain pending.
-This is an incremental read-only HUD, not full Milestone 1 completion.
+Status: build 8 passed Android CI/package checks and all five owner-reported Thor
+functional acceptance categories. See [Checkpoint 6](CHECKPOINT_6.md) for the exact
+tested source, observations, layout capacity note and open creature-legend decision.
+This accepts the bounded read-only increment, not full Milestone 1 completion.
 
 Builds on accepted build 7 (`core_status`, source
 `8382d31744c2c138afd5130f3f7862e9322f01d9`). The corrected movement observation in
@@ -48,7 +49,10 @@ Pinned source references:
 
 ## Build and installation
 
-After review and merge into `ds-dev`, start a NEW manual **CDDA-DS Android test** run:
+PR #3 has merged and build 8 already exists. No rebuild is required merely to record
+its acceptance. Tested source `346e0bdc3a49efd83ff329a02cc55bef948a8285` is preserved
+as `checkpoint/activity-status-8`. For a subsequent requested activity-status build,
+start a NEW manual **CDDA-DS Android test** run:
 
 | Setting | Value |
 |---|---|
@@ -83,10 +87,12 @@ preserved. No forced redraw, turn advancement, controller injection, or viewport
 change is added. Captures still follow the existing sidebar hook.
 
 Two paired rows show weariness/activity and transition/malus; pain has a full-width
-row. Existing fields are not removed or reduced. The existing scroll fallback remains
-for content that exceeds the display. Fit at default Thor DPI/fonts, scroll behavior
-and controller focus after swipes need actual hardware testing. This is not the
-final compact layout or the coordinated show/hide design.
+row. Existing fields are not removed or reduced. The owner reports that all readings
+fit legibly without clipping, at the limit before scrolling becomes necessary.
+The existing scroll fallback remains for subsequent content that exceeds the display.
+The owner explicitly defers layout changes until the data has been brought over and
+will share a minimap idea later. Do not infer its design or request it prematurely.
+This is not the final compact layout or the coordinated show/hide design.
 
 ## Validation completed and limits
 
@@ -103,27 +109,42 @@ The production JNI code was compiled into a host library and called from Java un
 focus above 100, embedded NUL, Unicode/supplementary characters, long text, malformed
 payloads, copy independence and session transitions. The native mailbox also passed
 AddressSanitizer and UndefinedBehaviorSanitizer. Workflow YAML and all ten Bash
-blocks passed syntax checks; this is not a GitHub runner execution.
+blocks passed syntax checks; these local checks alone were not a GitHub runner execution.
 
-The existing 51-test suite was not rerun locally. The next CI run must discover both
-old and new tests (69 expected), apply the actual pinned-engine overlay and compile
-the Android UI/native app. No Android Presentation compilation, emulator execution,
-Thor testing or new APK is claimed by these local checks.
+The existing 51-test suite was not rerun in that local implementation pass. Build 8
+subsequently ran all 69 tests successfully in GitHub CI, applied the eight-target
+overlay to the real pinned source and completed Android Java/native compilation
+and signing/package checks. The owner then reported the hardware results below.
+These results do not extend the substitute-widget tests into exhaustive real-engine
+coverage or establish every possible activity/weariness state.
 
-## Device acceptance (pending)
+## Device acceptance (build 8: owner-reported PASS)
 
-1. Check all five added readouts plus prior health/core values. Note whether scrolling
-   is needed at default Thor text size/DPI; verify no clipping or inaccessible rows.
-2. Compare weariness, activity, transition glyphs and malus text with the upper sidebar.
-   Exercise activity/rest and any weariness change available in a disposable test;
-   report unchanged/unexercised states rather than assuming they passed.
-3. Compare the pain description during damage/recovery and when the sidebar suppresses
-   pain text. A blank result should display a dash; `Unavailable` is a different state
-   to report, not a substitute for "No pain".
-4. Check prior health/stamina/current attributes, movement and focus. Compare both
-   displays at the same game refresh; no extra turn should be injected by the HUD.
-5. Touch/scroll the lower screen, then verify upper-controller focus, sleep/resume,
-   app switching, foreground/background transitions, menu clearing and reload.
+| Category | Result |
+|---|---|
+| Layout and scrolling | PASS: all readings legible and rows accessible without clipping; at the limit before scrolling becomes necessary. |
+| Activity and weariness | PASS: Weariness, Activity, Transition glyphs and Weary Malus match the upper sidebar and were observed changing in sync. |
+| Pain | PASS: visible dash when not in pain; descriptions and formatting update in sync with the upper sidebar. |
+| Previous readings and controller focus | PASS: no change from previously passing behavior reported. |
+| Lifecycle and clearing | PASS: no change from previously passing behavior reported. |
+
+Dynamic/lifecycle results are the owner's observations, not inferred from the photo.
+Exact categories/thresholds exercised were not enumerated; missing-widget behavior,
+alternate font/DPI settings and exhaustive scrolling or extended-play coverage are
+not claimed. Color fidelity remains deferred despite correct text/glyph behavior.
+
+## Subsequent regression and design work
+
+Preserve comparison of all five readings with the upper sidebar during activity/rest
+and pain changes, as well as prior health/core readings, controller focus, sleep/resume,
+app switching and menu/reload clearing. Compare both screens at the same game refresh;
+the accepted shared movement-mode refresh behavior is unchanged.
+
+The owner highlighted the nearby-creature name/count list and is undecided whether it
+needs migrating alongside the directional compass. Record that as an open inclusion/
+presentation decision, not a scope deletion or an approved always-visible layout.
+The pinned compass JSON defines the directional widgets and a separate name legend;
+see Checkpoint 6. No legend, optional control or visibility feature is implemented here.
 
 Variable anatomy, final colors/layout, remaining metrics, both maps, entity compass,
 message log and coordinated show/hide/sidebar removal remain later work. The original
