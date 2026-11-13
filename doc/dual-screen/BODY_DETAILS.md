@@ -1,14 +1,18 @@
 # Experiment 7: body comfort, oxygen and worn clothing/armor summaries
 
-Status: implemented with 24 new local host/fixture tests passing. Full Android
-compilation, actual engine evaluation and Thor acceptance remain pending. No new
-APK is created by this PR. Do not mark these fields accepted before device results.
+Status: build 11 passed Android CI/package checks and the owner's exercised Thor
+checks. Accepted as a checkpoint for continued incremental development, with
+explicit coverage gaps; see [Checkpoint 9](CHECKPOINT_9.md). Clothing-driven comfort
+changes, long clothing text, layered/uncovered clothing cases and the final oxygen
+meter-to-dash transition are not established by this report. No defects reported.
 
 Builds on build 10 (`equipment_status`, tested source
 `50474b61fd018ed46db61cfc6b253210ea3d1a7a`) and its documentation checkpoint
-`2dbf3d871f6fa73adf4b74d4cc5846e522b16015`. Keep the rollback source
+`2dbf3d871f6fa73adf4b74d4cc5846e522b16015`. Keep the earlier rollback source
 `checkpoint/equipment-status-10`. Its untested bionic-power behavior and long-item
-wrapping are still open verification items, not silently resolved by this PR.
+wrapping are still open verification items, not silently resolved by this increment.
+The tested build 11 source is preserved as `checkpoint/body-details-11` at
+`f7e2d5700b7504a35d754a5b243036396521aeaa`.
 
 The owner explicitly requested the three groups in one iteration. Preserve all
 previous health, stamina, core, activity, environment and equipment readings, and
@@ -109,14 +113,19 @@ recover content the upstream formatter already omitted.
 - Workflow YAML and all ten Bash blocks passed syntax checks. The workflow changes
   are exactly five added lines: the new selector option and dispatch case.
 
-The existing 109 tests were not rerun locally. CI should discover 133 tests, apply
-the overlay to the actual pinned source, and compile Android native/Java code.
-No full-engine build, Android Presentation compilation/execution, emulator test or
-Thor acceptance is established by the local host checks.
+The existing 109 tests were not rerun during the local implementation check.
+Subsequently, build 11 ran all 133 host/fixture tests successfully, applied the
+eight-target overlay to the actual pinned source, compiled Android native/Java
+code and passed the pipeline's signature/package checks. Its preceding artifact
+review checked download integrity and signing identity. None of those checks
+establish device behavior; the owner's separate observations are recorded below.
+This documentation update does not rerun CI or independently audit the build.
 
-## Next build
+## Build and installation
 
-After review and merge into `ds-dev`, start a NEW manual **CDDA-DS Android test** run:
+PR #6 is merged and build 11 already exists. No rebuild is needed merely to record
+these results. For a subsequent requested build, start a NEW manual **CDDA-DS
+Android test** run:
 
 | Setting | Value |
 |---|---|
@@ -130,19 +139,34 @@ permissions, signing and caches are unchanged. Use the owner's fresh-install
 process after backing up wanted data. Remove only CDDA-DS (test); leave official
 CDDA and signing secrets unchanged. In-place update/data migration remains unresolved.
 
-## Device acceptance (pending)
+## Device acceptance (build 11: exercised cases pass)
+
+| Category | Owner-reported result and limit |
+|---|---|
+| Layout and scrolling | PASS: every prior/new row, including Worn feet, is reachable and legible. Simultaneous lower swipe/upper joystick remains good. Long clothing descriptions were unavailable to test. |
+| Body comfort and trend | PASS for observed agreement and blank-trend dash. Clothing-driven comfort changes were not tested; high confidence is not a completed check. Nonblank trend/category transitions were not enumerated. |
+| Oxygen | PASS for reduced oxygen and recovery synchronized with the sidebar. The final full-capacity meter-to-dash transition was not explicitly confirmed. |
+| Worn clothing/armor | PASS for wear/remove/swap updates in sync with the sidebar. Same-part layering and uncovered-category output were not tested. |
+| Previous readings and lifecycle | PASS, reported with no additional notes. |
+
+See [Checkpoint 9](CHECKPOINT_9.md) for the exact tested source and coverage limits.
+No defects were reported in the exercised paths. This is a checkpoint for continued
+incremental development, not unconditional acceptance of every field/state. Earlier
+bionic-power and long-item-name coverage gaps remain open.
+
+## Future regression and completeness checks
 
 1. Reach all old/new rows by scrolling; check labels and wrapping, and repeat
    simultaneous lower swipe/upper joystick. Long equipment/clothing names remain a
    useful explicit test when available, not an assumed pass.
 2. Compare body comfort with the sidebar. Exercise practical clothing/environment
-   changes and compare trend text where shown. Mark unreached categories untested.
-3. Compare oxygen when reduced and recovering on a disposable character. At the
-   native full-capacity suppression state, expect the lower Oxygen row to show a
-   dash. Confirm the previous meter does not remain stale after suppression.
-4. Change worn items (wear/remove/swap), not merely the wielded item. Compare all
-   six summaries with the matching sidebar widgets. Include an uncovered category
-   and multiple worn items where practical; report native placeholders as observed.
+   changes and compare nonblank trend text where shown. Clothing-driven changes
+   remain untested; record actual transitions rather than inferring them.
+3. Preserve the observed reduced/recovering oxygen agreement. At the native
+   full-capacity suppression state, verify the lower Oxygen row returns to a dash
+   and does not retain the previous meter. That final transition is unconfirmed.
+4. Preserve wear/remove/swap agreement. Exercise uncovered-category output and
+   multiple worn layers on the same body part; these were not tested in build 11.
    Do not treat these summaries as a new detailed armor-stat screen.
 5. Confirm prior readings, lower-touch/controller focus, sleep/resume, app switching,
    main-menu clearing and reload. Compare both screens at the same game refresh.
@@ -153,5 +177,6 @@ Both maps, compass/legend, messages and remaining metrics are unfinished. Variab
 anatomy, complete state/color semantics and final layout precede coordinated
 show/hide and sidebar removal. Context-themed pages, repeated readings across tabs,
 map grouping and the creature-legend decision remain later discussion. The owner's
-minimalist font/color/framing preferences do not authorize a redesign in this PR.
-This increment adds no interaction controls and is not full Milestone 1 completion.
+minimalist font/color/framing preferences do not authorize a redesign in this
+checkpoint. This increment adds no interaction controls and is not full Milestone 1
+completion. The acceptance update changes documentation only, not the tested code.
