@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       experiment:
-        description: Select baseline, stamina, body-health, or core-status read-only HUD.
+        description: Select baseline or an incremental read-only HUD experiment.
         type: choice
         required: true
         default: baseline
@@ -14,6 +14,7 @@ on:
           - stamina_probe
           - body_status
           - core_status
+          - activity_status
       signing_mode:
         description: Persistent for normal iteration; disposable requires reinstalling between builds.
         type: choice
@@ -171,6 +172,10 @@ jobs:
             core_status)
               python3 build-scripts/ds/apply_core_status.py --output dist
               cp doc/dual-screen/CORE_STATUS.md dist/PROBE-README.md
+              ;;
+            activity_status)
+              python3 build-scripts/ds/apply_activity_status.py --output dist
+              cp doc/dual-screen/ACTIVITY_STATUS.md dist/PROBE-README.md
               ;;
             *) echo 'Unknown experiment selection' >&2; exit 1 ;;
           esac
