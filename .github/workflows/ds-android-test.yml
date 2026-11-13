@@ -12,6 +12,7 @@ on:
         options:
           - baseline
           - stamina_probe
+          - body_status
       signing_mode:
         description: Persistent for normal iteration; disposable requires reinstalling between builds.
         type: choice
@@ -161,6 +162,10 @@ jobs:
             stamina_probe)
               python3 build-scripts/ds/apply_stamina_probe.py --output dist
               cp doc/dual-screen/STAMINA_PROBE.md dist/PROBE-README.md
+              ;;
+            body_status)
+              python3 build-scripts/ds/apply_body_status.py --output dist
+              cp doc/dual-screen/BODY_STATUS.md dist/PROBE-README.md
               ;;
             *) echo 'Unknown experiment selection' >&2; exit 1 ;;
           esac
