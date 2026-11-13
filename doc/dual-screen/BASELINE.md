@@ -1,6 +1,6 @@
 # CDDA-DS: pinned baseline and build checkpoint
 
-Status: build setup in progress; no CDDA-DS APK has been built or device-tested yet.
+Status: the first source-built APK succeeded and the owner reported a brief successful Thor smoke test. Full acceptance testing remains incomplete. See [CHECKPOINT_1.md](CHECKPOINT_1.md) for the exact source, run, artifact, and limitations.
 
 ## Source of truth
 
@@ -12,15 +12,17 @@ Status: build setup in progress; no CDDA-DS APK has been built or device-tested 
 - Comparison APK SHA-256: `f2f04a347728664cc0a240f50630d6e278f1e88f04101c1d811404af54749bab`.
 - Release: https://github.com/CleverRaven/Cataclysm-DDA/releases/tag/cdda-experimental-2026-10-19-0834
 
-The owner has verified that the official build's controller scheme works on their Ayn Thor. This is not a claim that save/load, sleep/resume, every gameplay system, or our future build has passed acceptance testing.
+The owner has verified that the official build's controller scheme works on their Ayn Thor. The additional brief smoke test of our own APK is not a claim that every save/load, sleep/resume, or gameplay test has passed.
 
-## Current checkpoint: build the baseline ourselves
+## Completed build checkpoint and immediate follow-up
 
-Produce one manually requested ARM64 Android test APK from the pinned game source. Do not change gameplay, controller logic, rendering, or the HUD at this checkpoint. Give the test installation a separate application ID, document-provider authority, and visible label so it does not replace the official installation.
+One manually requested ARM64 Android test APK was produced from the pinned game source. Its separate application ID, document-provider authority, and visible label are intended to coexist with the official installation. No dual-screen interface is implemented yet.
 
-The initial build may reuse the exact comparison APK's packaged graphics, sounds, translations, and shader artifacts. It must verify the APK hash first and must compile the native game library and Android application from source, not repackage the official executable. Record this asset dependency explicitly; this is not a completely source-only or bit-for-bit reproducible release build.
+Next, validate persistent test signing and conservative build caching without changing gameplay, controller logic, rendering, or the HUD. See [ANDROID_BUILD.md](ANDROID_BUILD.md) and [SIGNING.md](SIGNING.md). A protected owner-held signing key must not be committed, cached, published, or pasted into chat.
 
-Use disposable saves. Test installation, launch, controller direction selection/commit, ordinary menus, save/reload, and sleep/resume on the Thor. A successful CI build is not a device acceptance pass.
+The build reuses the exact comparison APK's packaged graphics, sounds, translations, and shader artifacts after verifying its hash. The native game library and Android application are compiled from source, not repackaged from the official executable. This is not a completely source-only or bit-for-bit reproducible release build.
+
+Use disposable saves. Continue installation, launch, controller direction selection/commit, ordinary-menu, save/reload, and sleep/resume testing on the Thor. A successful CI build is not a complete device acceptance pass.
 
 ## Milestone 1 remains unchanged
 
