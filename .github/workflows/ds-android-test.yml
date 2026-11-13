@@ -36,7 +36,6 @@ jobs:
       UPSTREAM_BUILD_NUMBER: ${{ github.run_number }}
       DS_SIGNING_MODE: ${{ inputs.signing_mode }}
       DS_USE_CACHE: ${{ inputs.use_cache }}
-      CCACHE_DIR: ${{ runner.temp }}/ds-ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
       CCACHE_MAXSIZE: 2G
@@ -46,6 +45,14 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
+
+      - name: Initialize the compiler cache path on the runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The runner context is not available in job-level env expressions.
+          # Export the actual runtime path for all subsequent steps instead.
+          printf 'CCACHE_DIR=%s/ds-ccache\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
 
       - name: Set up Java 17
         uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
