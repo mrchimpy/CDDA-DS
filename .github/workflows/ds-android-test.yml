@@ -17,6 +17,7 @@ on:
           - activity_status
           - environment_status
           - equipment_status
+          - body_details
       signing_mode:
         description: Persistent for normal iteration; disposable requires reinstalling between builds.
         type: choice
@@ -186,6 +187,10 @@ jobs:
             equipment_status)
               python3 build-scripts/ds/apply_equipment_status.py --output dist
               cp doc/dual-screen/EQUIPMENT_STATUS.md dist/PROBE-README.md
+              ;;
+            body_details)
+              python3 build-scripts/ds/apply_body_details.py --output dist
+              cp doc/dual-screen/BODY_DETAILS.md dist/PROBE-README.md
               ;;
             *) echo 'Unknown experiment selection' >&2; exit 1 ;;
           esac
