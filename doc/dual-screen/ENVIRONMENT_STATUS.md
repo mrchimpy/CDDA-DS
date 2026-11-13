@@ -1,12 +1,18 @@
 # Experiment 5: date, time and surroundings
 
-Status: implemented with 20 new local host/fixture tests passing. Full Android build,
-real-engine integration and Thor acceptance are pending. No new APK exists yet.
+Status: build 9 passed Android CI/package checks and all five owner-reported Thor
+acceptance categories. The expanded stack scrolls correctly, including simultaneous
+lower-screen swiping and upper-game joystick input. Dropping a smartphone and
+smartwatch changed exact time to `Morning` and temperature to `-`, matching the
+upper sidebar. See [Checkpoint 7](CHECKPOINT_7.md) for evidence and limits.
+This accepts the bounded environment increment, not full sidebar migration.
 
 Builds on accepted build 8 (`activity_status`, tested source
 `346e0bdc3a49efd83ff329a02cc55bef948a8285`) and its acceptance record at
 `a84383a53c9c59624e7c21d9232490aa6e8f1cb4`. All prior health, stamina, current core
 and activity readings remain. The upper sidebar and original viewport stay intact.
+Tested build 9 source is `5067a4cdba6cb1fdeab19ed899237568cd66f80d`, preserved as
+`checkpoint/environment-status-9`.
 
 ## Added information
 
@@ -27,8 +33,10 @@ In the pinned `src/display.cpp`, `time_string` gives exact time with a watch,
 approximate time when the character can see the sky, and `???` otherwise. `get_temp`
 returns a reading only with the relevant thermometer access/flag, otherwise `-`.
 Using those widgets preserves these knowledge restrictions rather than exposing raw
-engine state. Temperature uses the game's configured units. Actual runtime parity
-and changes of equipment/visibility still require device tests.
+engine state. Temperature uses the game's configured units. The owner has now
+verified exact-to-approximate time and measured-to-unavailable temperature after
+removing both inventory devices. No-watch/no-sky `???`, alternate units and every
+instrument/visibility combination remain outside the reported device coverage.
 
 The seven named definitions are in `data/json/ui/{date,time,place,weather,lighting,
 wind,env_temp}.json` at pinned upstream `bb52239dee96df602da097f113382fe5c9a9c115`.
@@ -64,8 +72,10 @@ polling remain. Shared next-turn movement refresh is unchanged, not a reopened b
 
 The first five activity readouts retain their existing paired rows/full-width pain
 row. Seven full-width wrapping rows are appended beneath them, using the existing
-font size. Given the owner's build 8 space-limit report, expect to use the existing
-scroll fallback; actual fit and swipe/controller-focus behavior remain untested.
+font size. The owner reports correct wrapping, legibility and scrolling access to
+bottommost content in build 9. Lower-screen swipes preserve upper controller focus,
+including when performed simultaneously with joystick rotation. This establishes
+the reported scrolling interaction, not future button/page behavior or all devices.
 No information is removed or text shrunk to force a no-scroll fit.
 
 The owner's bottom-edge tabs and context-themed pages remain IDEATION ONLY. Repeated
@@ -77,9 +87,9 @@ coordinated show/hide/sidebar removal stay in the later completeness pass.
 
 ## Validation actually performed
 
-- 20 new host/fixture tests passed, including eight-target overlay/provenance,
-  source/template hash guards, symlink/existing-file/duplicate-anchor refusal,
-  unchanged older templates/hooks and pinned widget-definition hashes.
+- 20 new host/fixture tests passed before the PR, including eight-target
+  overlay/provenance, source/template hash guards, symlink/existing-file/duplicate-
+  anchor refusal, unchanged older templates/hooks and pinned widget-definition hashes.
 - A compiled capture fixture checks all 12 widget slots, copied definitions,
   inactive-session suppression, missing widgets and unknown readings. It uses small
   substitute game/widget types, NOT the actual CDDA widget renderer.
@@ -91,14 +101,34 @@ coordinated show/hide/sidebar removal stay in the later completeness pass.
   UndefinedBehaviorSanitizer. Workflow YAML and all ten Bash blocks passed syntax
   checks; the only workflow additions are the selector and dispatch case.
 
-The existing 69 tests were not rerun locally. CI must run all tests (89 expected),
-apply this overlay to actual pinned source and compile the Android native/Java app.
-No Android Presentation compilation, emulator execution, complete engine integration,
-or hardware acceptance is claimed by these host checks.
+The existing 69 tests were not rerun during that local implementation pass.
+Subsequently, build 9 CI ran all 89 tests successfully, applied the eight-target
+overlay to actual pinned source, compiled the Android native/Java app and passed
+signing/package checks. The prior log-and-package review checked download integrity
+and certificate identity. Those checks alone did not establish device behavior;
+the owner-reported acceptance below supplies the hardware evidence. No emulator
+execution or exhaustive engine-state testing is claimed.
 
-## Build and acceptance
+## Device acceptance (build 9: reported categories PASS)
 
-After review/merge into `ds-dev`, start a NEW manual **CDDA-DS Android test** run:
+| Category | Owner-reported result |
+|---|---|
+| Layout and scrolling | PASS: wrapping, legibility and access to the bottommost content work; lower swipes preserve upper controller focus, even during simultaneous joystick rotation. |
+| New readings | PASS: all seven readings and observed changes stay in sync with the original upper sidebar. |
+| Time and character knowledge | PASS: exact time with smartphone and smartwatch in inventory; dropping both changed `8:02am` to `Morning` in parity with the sidebar. |
+| Temperature | PASS: dropping both items changed `50F` to `-` in parity with the sidebar. |
+| Previous readings and lifecycle | PASS: owner reported the combined category as all good. |
+
+The report does not enumerate every environmental state, test each device's
+individual capabilities, report the no-watch/no-sky `???` case, or cover alternate
+temperature units and missing-widget `Unavailable` behavior. These remain distinct
+from the successful item-removal examples. See Checkpoint 7 for the full limits.
+
+## Build and future regression checks
+
+PR #4 is merged and build 9 already exists and has owner-reported acceptance.
+No rebuild is needed to record these results. For a later requested build, start
+a NEW manual **CDDA-DS Android test** run:
 
 | Setting | Value |
 |---|---|
@@ -112,16 +142,17 @@ Continue the owner's fresh-install process after backing up wanted test data;
 remove only CDDA-DS (test), not official CDDA. Signing secrets and app identity stay
 unchanged. In-place update/data migration remains unresolved.
 
-For the device test:
-1. Scroll through all old/new rows at default Thor settings. Check wrapping, no
-   clipped/inaccessible content, and controller focus after lower-screen swipes.
+For future regression/completeness checks:
+1. Preserve wrapping, legibility and bottommost access; repeat scrolling while
+   operating the controller after changes to the lower interface.
 2. Compare all seven readings with the upper sidebar at the same game redraw.
-   Exercise location changes and lighting/weather/wind changes that are practical;
-   record conditions not reached as not exercised.
-3. Check Time with/without a watch and with/without sky visibility where practical.
-   Approximate/unknown output must remain consistent with the game's display.
-4. Check Temperature with/without thermometer access and the current unit setting.
-   A legitimate `-` differs from `Unavailable`. Do not assume all unknown cases passed
-   just because a character possessing every instrument shows numeric readings.
-5. Recheck health/stamina/core/activity values, sleep/resume, app switching,
-   main-menu clearing and reload. The HUD must not advance a turn by itself.
+   Exercise additional location/lighting/weather/wind states where practical;
+   record conditions not reached rather than assuming they pass.
+3. Preserve the observed exact-to-approximate time change after instrument removal.
+   Separately test no-watch/no-sky unknown time and restoration of instrument access
+   when practical; those cases are not established by the current report.
+4. Preserve the observed temperature-to-dash behavior. Check alternate units and
+   equipment combinations when practical. A legitimate `-` differs from a missing
+   widget's `Unavailable`; do not conflate them.
+5. Repeat health/stamina/core/activity readings, sleep/resume, app switching,
+   main-menu clearing and reload after future implementation changes.
