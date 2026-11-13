@@ -1,11 +1,12 @@
 # Experiment 3: current core status, body health, and stamina
 
-Status: build 7 passed Android CI/package checks. Owner-reported Thor results pass
-layout, current values including damage penalties, health/stamina/focus handling,
-and session clearing. Movement-mode refresh is PARTIAL: the lower label updates
-after the next turn rather than immediately with the upper sidebar. See
-[Checkpoint 5](CHECKPOINT_5.md) and open finding `CORE-REFRESH-01`. This is a qualified
-checkpoint for continued development, not an all-pass acceptance.
+Status: build 7 passed Android CI/package checks and the owner's reported functional
+categories. The owner corrected the movement observation: BOTH the upper sidebar
+and lower label wait until the next-turn sidebar refresh. Movement mode therefore
+passes sidebar parity; immediate no-turn refresh is not claimed. See
+[Checkpoint 5](CHECKPOINT_5.md) for the correction and closure of the superseded
+lower-only mismatch finding `CORE-REFRESH-01`. This accepts the bounded increment,
+not full sidebar migration or exhaustive stability.
 
 This builds on the accepted build 6 health/stamina display. It adds the requested
 Strength, Dexterity, Intelligence, Perception, Speed, Movement mode, and Focus.
@@ -30,7 +31,7 @@ safe default. `stamina_probe` and `body_status` remain available unchanged. The
 accepted body-status source is preserved as `checkpoint/body-status-6` at
 `643eabbf2f406cc69a99798cef3a073d9b1f3301`. The tested core-status source is
 `checkpoint/core-status-7` at `8382d31744c2c138afd5130f3f7862e9322f01d9`, with the
-movement-refresh exception documented in Checkpoint 5.
+corrected movement-refresh observation documented in Checkpoint 5.
 
 Use the owner's fresh-install development process after backing up wanted test
 data. Remove only CDDA-DS (test), not official CDDA. Keep the persistent signing
@@ -98,30 +99,37 @@ to the real pinned source, and completed Android Java/native compilation and the
 signing/package checks. The owner supplied the device observations below; CI success
 did not establish refresh behavior after a no-turn mode selection.
 
-## Device acceptance (build 7: qualified, movement refresh PARTIAL)
+## Device acceptance (build 7: reported categories PASS for sidebar parity)
 
 | Category | Owner-reported result |
 |---|---|
 | Layout | PASS: readable with no clipped labels/values and no scrolling at default Thor text size/DPI. |
 | Current values | PASS: all shown attributes/meters match the upper sidebar, including penalties from incoming damage. |
-| Movement mode | PARTIAL: the upper sidebar changes immediately after selection; the lower label changes only after the next turn. |
+| Movement mode | PASS for sidebar parity, after correction: both displays wait until the sidebar refreshes next turn; no lower-only delay is reported. |
 | Health, stamina and focus handling | PASS: combined checklist category reported passed. |
 | Session clearing | PASS: menu/reload clearing category reported passed. |
 
-`CORE-REFRESH-01` remains open. The owner explicitly deferred an immediate fix and
-plans to test other readouts' no-turn refresh behavior after the next build. That
-cross-metric timing test is pending; do not claim all metrics share the delay.
-The capture/publication path is a working hypothesis, not a confirmed root cause.
-See Checkpoint 5 for reproduction and the snapshot-number/age diagnostic.
+`CORE-REFRESH-01` is closed/superseded as a lower-HUD mismatch, not fixed by a code
+change. The earlier claim that the upper sidebar updates immediately was retracted
+by the owner. Shared next-turn refresh remains an observation. A connection to
+no-turn action cost is the owner's hypothesis; exact cause, upstream intent and
+behavior on a separately tested unmodified baseline have not been verified here.
+See Checkpoint 5 for the correction history and remaining limits.
 
-## Future regression and closure checks
+Other readouts' no-turn timing remains untested. The owner's planned cross-metric
+observations after the next build remain useful; no delay or fault is presumed for
+them. Immediate movement feedback would be a separate potential UX enhancement,
+not a currently established companion-specific defect.
+
+## Future regression and completeness checks
 
 1. Preserve default Thor fit and correct current values, including penalties/bonuses.
-2. Change movement through ordinary controls without advancing a turn; the lower
-   name/letter must eventually follow accepted selections in its normal refresh
-   cycle, while rejected switches must not invent a change. Currently PARTIAL.
+2. Change movement through ordinary controls and compare both displays at each
+   redraw. Preserve parity; rejected switches must not invent a change. The observed
+   shared next-turn refresh is accepted for this bounded increment, not a promise
+   of immediate feedback or coverage of every possible mode.
 3. Check other legitimately no-turn state changes against both displays; record
-   snapshot number/age to help distinguish capture from rendering. Currently pending.
+   snapshot number/age when useful. That cross-metric timing check remains pending.
 4. Repeat health/stamina changes, lower-touch/controller focus, sleep/resume, app
    switching, menu clearing and reload checks after future implementation changes.
 
@@ -132,8 +140,7 @@ which parts warrant health bars are required completeness/layout checks before
 final layout and coordinated show/hide/sidebar removal, not part of this increment.
 Upstream color rules, complete translation of fixed HUD labels, other metrics,
 both maps, compass, message log, interactive actions, and visibility controls are
-not implemented here. Sampling remains tied to the current sidebar hook. The known
-no-turn movement refresh gap must be addressed before the lower HUD replaces the
-upper sidebar; keeping the last snapshot in an idle menu is not blanket acceptance
-of stale values when the original sidebar already shows a change. This is not full
+not implemented here. Sampling remains tied to the current sidebar hook. General
+freshness/parity still belongs in the completeness pass before sidebar removal;
+the claimed lower-only movement-refresh defect is withdrawn. This is not full
 Milestone 1.
