@@ -1,9 +1,17 @@
 name: CDDA-DS Android test
-run-name: CDDA-DS baseline test build ${{ github.run_number }} (${{ inputs.signing_mode }})
+run-name: CDDA-DS build ${{ github.run_number }} (${{ inputs.experiment }}, ${{ inputs.signing_mode }})
 
 on:
   workflow_dispatch:
     inputs:
+      experiment:
+        description: Baseline stays single-screen; stamina_probe adds a read-only second-display experiment.
+        type: choice
+        required: true
+        default: baseline
+        options:
+          - baseline
+          - stamina_probe
       signing_mode:
         description: Persistent for normal iteration; disposable requires reinstalling between builds.
         type: choice
@@ -26,7 +34,7 @@ concurrency:
 
 jobs:
   android:
-    name: ARM64 baseline test APK
+    name: ARM64 test APK
     if: github.repository == 'mrchimpy/CDDA-DS' && github.ref == 'refs/heads/ds-dev'
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -36,6 +44,7 @@ jobs:
       UPSTREAM_BUILD_NUMBER: ${{ github.run_number }}
       DS_SIGNING_MODE: ${{ inputs.signing_mode }}
       DS_USE_CACHE: ${{ inputs.use_cache }}
+      DS_EXPERIMENT: ${{ inputs.experiment }}
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
       CCACHE_MAXSIZE: 2G
@@ -60,7 +69,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Confirm this checkpoint has no game or Android source changes
+      - name: Verify original source before applying explicit overlays
         shell: bash
         run: |
           set -euo pipefail
@@ -77,6 +86,7 @@ jobs:
             echo "run: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
             echo "signing_mode: $DS_SIGNING_MODE"
             echo "caches_requested: $DS_USE_CACHE"
+            echo "experiment: $DS_EXPERIMENT"
           } > dist/BUILD-INFO.txt
 
       - name: Prepare signing (fail early if persistent secrets are missing)
@@ -142,6 +152,19 @@ jobs:
           cp LICENSE* dist/licenses/
           printf 'CDDA-DS baseline test\nSource: %s\nBaseline: %s\n' "$GITHUB_SHA" "$BASELINE_SHA" > VERSION.txt
 
+      - name: Apply the selected experiment (baseline is unchanged)
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$DS_EXPERIMENT" in
+            baseline) ;;
+            stamina_probe)
+              python3 build-scripts/ds/apply_stamina_probe.py --output dist
+              cp doc/dual-screen/STAMINA_PROBE.md dist/PROBE-README.md
+              ;;
+            *) echo 'Unknown experiment selection' >&2; exit 1 ;;
+          esac
+
       - name: Compile and package ARM64 from source
         working-directory: android
         shell: bash
@@ -154,7 +177,7 @@ jobs:
           ./gradlew --no-daemon --console=plain --stacktrace --max-workers=2 \
             -Pj=2 -Plocalize=false \
             -Pabi_arm_32=false -Pabi_arm_64=true -Pabi_x86_32=false -Pabi_x86_64=false \
-            "-Poverride_version=DS-baseline-${GITHUB_SHA:0:12}-ci${GITHUB_RUN_NUMBER}" \
+            "-Poverride_version=DS-${DS_EXPERIMENT}-${GITHUB_SHA:0:12}-ci${GITHUB_RUN_NUMBER}" \
             assembleExperimentalRelease 2>&1 | tee "$RUNNER_TEMP/ds-gradle.log"
 
       - name: Record compiler cache statistics
@@ -197,8 +220,10 @@ jobs:
           cp "${apks[0]}" "dist/CDDA-DS-arm64-test-${GITHUB_RUN_NUMBER}.apk"
           (cd dist && sha256sum ./*.apk > SHA256SUMS.txt)
           {
-            echo '## Baseline test APK built'
-            echo 'This is NOT the dual-screen implementation yet.'
+            echo '## Test APK built'
+            echo "Experiment: $DS_EXPERIMENT"
+            echo 'stamina_probe is a one-value experiment, not the complete sidebar migration.'
+            echo 'baseline has no second-screen code.'
             echo "Signing mode: $DS_SIGNING_MODE"
             echo 'Build 2 used a discarded key: back up its test saves before the one-time reinstall.'
             echo 'Persistent-key builds can update one another; disposable builds cannot.'
