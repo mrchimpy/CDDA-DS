@@ -23,6 +23,7 @@ on:
           - hud_layout
           - hud_refinement
           - hud_polish
+          - native_colors
       signing_mode:
         description: Persistent for normal iteration; disposable requires reinstalling between builds.
         type: choice
@@ -232,6 +233,16 @@ jobs:
               python3 build-scripts/ds/apply_hud_polish.py --output dist
               cp doc/dual-screen/HUD_POLISH.md dist/PROBE-README.md
               ;;
+            native_colors)
+              python3 build-scripts/ds/apply_body_details.py --output dist
+              python3 build-scripts/ds/apply_hud_presentation.py --output dist
+              python3 build-scripts/ds/apply_needs_status.py --output dist
+              python3 build-scripts/ds/apply_hud_layout.py --output dist
+              python3 build-scripts/ds/apply_hud_refinement.py --output dist
+              python3 build-scripts/ds/apply_hud_polish.py --output dist
+              python3 build-scripts/ds/apply_native_colors.py --output dist
+              cp doc/dual-screen/NATIVE_COLORS.md dist/PROBE-README.md
+              ;;
             *) echo 'Unknown experiment selection' >&2; exit 1 ;;
           esac
 
@@ -266,7 +277,7 @@ jobs:
           shopt -s nullglob
           apks=(android/app/build/outputs/apk/experimental/release/*.apk)
           test "${#apks[@]}" -eq 1
-          if [ "$DS_EXPERIMENT" = 'hud_presentation' ] || [ "$DS_EXPERIMENT" = 'needs_status' ] || [ "$DS_EXPERIMENT" = 'hud_layout' ] || [ "$DS_EXPERIMENT" = 'hud_refinement' ] || [ "$DS_EXPERIMENT" = 'hud_polish' ]; then
+          if [ "$DS_EXPERIMENT" = 'hud_presentation' ] || [ "$DS_EXPERIMENT" = 'needs_status' ] || [ "$DS_EXPERIMENT" = 'hud_layout' ] || [ "$DS_EXPERIMENT" = 'hud_refinement' ] || [ "$DS_EXPERIMENT" = 'hud_polish' ] || [ "$DS_EXPERIMENT" = 'native_colors' ]; then
             python3 build-scripts/ds/apply_hud_presentation.py \
               --verify-apk "${apks[0]}" --output dist/HUD-FONT-ASSETS.json
           fi
