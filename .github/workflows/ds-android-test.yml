@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       experiment:
-        description: Baseline stays single-screen; stamina_probe adds a read-only second-display experiment.
+        description: Select baseline, stamina, body-health, or core-status read-only HUD.
         type: choice
         required: true
         default: baseline
@@ -13,6 +13,7 @@ on:
           - baseline
           - stamina_probe
           - body_status
+          - core_status
       signing_mode:
         description: Persistent for normal iteration; disposable requires reinstalling between builds.
         type: choice
@@ -167,6 +168,10 @@ jobs:
               python3 build-scripts/ds/apply_body_status.py --output dist
               cp doc/dual-screen/BODY_STATUS.md dist/PROBE-README.md
               ;;
+            core_status)
+              python3 build-scripts/ds/apply_core_status.py --output dist
+              cp doc/dual-screen/CORE_STATUS.md dist/PROBE-README.md
+              ;;
             *) echo 'Unknown experiment selection' >&2; exit 1 ;;
           esac
 
@@ -227,11 +232,11 @@ jobs:
           {
             echo '## Test APK built'
             echo "Experiment: $DS_EXPERIMENT"
-            echo 'stamina_probe is a one-value experiment, not the complete sidebar migration.'
+            echo 'HUD experiments retain the upper sidebar; full migration is not complete.'
             echo 'baseline has no second-screen code.'
             echo "Signing mode: $DS_SIGNING_MODE"
-            echo 'Build 2 used a discarded key: back up its test saves before the one-time reinstall.'
-            echo 'Persistent-key builds can update one another; disposable builds cannot.'
+            echo 'Use a fresh test-app install after backing up wanted data; keep signing secrets unchanged.'
+            echo 'In-place update/data migration remains unresolved despite persistent signing.'
             echo 'Keep the official CDDA installation. Continue using disposable test worlds.'
           } >> "$GITHUB_STEP_SUMMARY"
 
